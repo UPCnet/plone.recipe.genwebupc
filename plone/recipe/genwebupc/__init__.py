@@ -65,7 +65,7 @@ class Recipe(object):
 
             localhost = options.get('localhost', 'localhost')
             import ipdb; ipdb.set_trace( )
-            ports = options.get('zeoportsmap', 'localhost')
+            ports = options.get('zeoportsmap', '8001').split(" ")
             try:
                 zeoportsmap = dict(zip(zeonames, ports))
             except:

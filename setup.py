@@ -12,25 +12,13 @@ def read(*rnames):
 version = '1.0'
 
 long_description = (
-    read('README.txt')
-    + '\n' +
-    'Detailed Documentation\n'
-    '**********************\n'
-    + '\n' +
-    read('plone', 'recipe', 'genwebupc', 'README.txt')
-    + '\n' +
-    'Contributors\n'
-    '************\n'
-    + '\n' +
-    read('CONTRIBUTORS.txt')
+    read('README.rst')
     + '\n' +
     'Change history\n'
     '**************\n'
     + '\n' +
     read('CHANGES.txt')
-    + '\n' +
-   'Download\n'
-    '********\n')
+    + '\n')
 
 entry_point = 'plone.recipe.genwebupc:Recipe'
 entry_points = {"zc.buildout": ["default = %s" % entry_point]}
