@@ -64,7 +64,6 @@ class Recipe(object):
         if deploytype == 'zope':
 
             localhost = options.get('localhost', 'localhost')
-            import ipdb; ipdb.set_trace( )
             ports = options.get('zeoportsmap', '8001').split(" ")
             try:
                 zeoportsmap = dict(zip(zeonames, ports))
