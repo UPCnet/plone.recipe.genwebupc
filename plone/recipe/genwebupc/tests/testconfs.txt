@@ -1,0 +1,224 @@
+==========================
+plone.recipe.genwebupc
+==========================
+
+
+This is the doctest for plone.recipe.zope2instance. It ensures the template
+works fine. It is based on zc.buildout testing module::
+
+    >>> from zc.buildout.testing import *
+    >>> from os.path import join
+    >>> import sys, os
+    >>> options = globals()
+
+    >>> WINDOWS = sys.platform == 'win32'
+
+Zope
+====
+
+Let's create a minimum buildout that configures a zope instance::
+
+    >>> write('buildout.cfg',
+    ... '''
+    ... [buildout]
+    ... parts = genwebconfig zc1
+    ... find-links = %(sample_buildout)s/eggs
+    ...
+    ... [genwebconfig]
+    ... recipe = plone.recipe.genwebupc
+    ... deploytype = zope
+    ... configservertype = file
+    ... configdir = %(sample_buildout)s
+    ... configserver = myzeoserver.mydomain
+    ... zeoconfig = zeo1 8001
+    ... localhost = myzeoserver.mydomain
+    ...
+    ... [zc1]
+    ... recipe = plone.recipe.zope2instance
+    ... user = admin:admin
+    ... eggs =
+    ... zope-conf-additional = %%include ${buildout:directory}/zc1-mountpoints.conf
+    ... ''' % options)
+
+Setup the config files::
+
+    >>> write('zeo1',
+    ... '''mountpoint1''')
+
+    >>> write('myzeoserver.mydomain',
+    ... '''zeo1 zc1 11001 myzeoserver.mydomain''')
+
+Let's run it::
+
+    >>> print system(join('bin', 'buildout')),
+    Installing genwebconfig.
+    Unused options for ...
+    Installing zc1.
+    Generated script '.../zc1'.
+
+Once run, check for the startup scripts::
+
+    >>> zopemountpointsconfigfile = open(os.path.join('zc1-mountpoints.conf')).read()
+    >>> zopemountpointsconfigfile = zopemountpointsconfigfile.replace('\\', '/')
+    >>> print zopemountpointsconfigfile
+    <zodb_db mountpoint1>
+      cache-size 5000
+      <zeoclient>
+         blob-dir .../var/blobstorage/mountpoint1
+         shared-blob-dir off
+         server myzeoserver.mydomain:8001
+         min-disconnect-poll 1
+         storage mountpoint1
+         name mountpoint1
+         cache-size 20MB
+      </zeoclient>
+      mount-point /mountpoint1
+    </zodb_db>
+    <BLANKLINE>
+
+ZEO
+===
+
+Let's create a minimum buildout that configures a zeo instance::
+
+    >>> write('buildout.cfg',
+    ... '''
+    ... [buildout]
+    ... parts = genwebconfig zeo1
+    ... find-links = %(sample_buildout)s/eggs
+    ...
+    ... [genwebconfig]
+    ... recipe = plone.recipe.genwebupc
+    ... deploytype = zeo
+    ... configservertype = file
+    ... configdir = %(sample_buildout)s
+    ... configserver = myzeoserver.mydomain
+    ... zeoconfig = zeo1 8001
+    ... localhost = myzeoserver.mydomain
+    ...
+    ... [zeo1]
+    ... recipe = plone.recipe.zeoserver
+    ... zeo-conf-additional = %%include %(sample_buildout)s/instancies-zeo1.conf
+    ... ''' % options)
+
+Setup the config files::
+
+    >>> write('zeo1',
+    ... '''mountpoint1''')
+
+    >>> write('myzeoserver.mydomain',
+    ... '''zeo1 zc1 11001 myzeoserver.mydomain''')
+
+Let's run it::
+
+    >>> print system(join('bin', 'buildout')),
+    Uninstalling zc1.
+    Uninstalling genwebconfig.
+    Installing genwebconfig.
+    Installing zeo1.
+    Created directory /sample-buildout/parts/zeo1
+    Created directory /sample-buildout/parts/zeo1/etc
+    Created directory /sample-buildout/parts/zeo1/var
+    Created directory /sample-buildout/parts/zeo1/log
+    Created directory /sample-buildout/parts/zeo1/bin
+    Wrote file /sample-buildout/parts/zeo1/etc/zeo.conf
+    Wrote file /sample-buildout/parts/zeo1/bin/zeoctl
+    Changed mode for /sample-buildout/parts/zeo1/bin/zeoctl to 755
+    Wrote file /sample-buildout/parts/zeo1/bin/runzeo
+    Changed mode for /sample-buildout/parts/zeo1/bin/runzeo to 755
+    Generated script '/sample-buildout/bin/zeo1'.
+    Generated script '/sample-buildout/bin/zeopack'.
+    Generated script '/sample-buildout/bin/repozo'.
+
+Once run, check for the startup scripts::
+
+    >>> zeomountpointsconfigfile = open(os.path.join('instancies-zeo1.conf')).read()
+    >>> zeomountpointsconfigfile = zeomountpointsconfigfile.replace('\\', '/')
+    >>> print zeomountpointsconfigfile
+    <blobstorage mountpoint1>
+      blob-dir .../var/blobstorage/mountpoint1
+      <filestorage mountpoint1>
+        path .../var/filestorage/Data_mountpoint1.fs
+      </filestorage>
+    </blobstorage>
+    <BLANKLINE>
+
+
+ZEO and Zope dual configs
+=========================
+
+Let's create a minimum buildout that configures both a zeo and a zope instance::
+
+    >>> write('buildout.cfg',
+    ... '''
+    ... [buildout]
+    ... parts = genwebconfig zeo1 zc1
+    ... find-links = %(sample_buildout)s/eggs
+    ...
+    ... [genwebconfig]
+    ... recipe = plone.recipe.genwebupc
+    ... deploytype = zeo
+    ... configservertype = file
+    ... configdir = %(sample_buildout)s
+    ... configserver = myzeoserver.mydomain
+    ... zeoconfig = zeo1 8001
+    ... localhost = myzeoserver.mydomain
+    ...
+    ... [zc1]
+    ... recipe = plone.recipe.zope2instance
+    ... user = admin:admin
+    ... eggs =
+    ... zope-conf-additional = %%include ${buildout:directory}/zc1-mountpoints.conf
+    ...
+    ... [zeo1]
+    ... recipe = plone.recipe.zeoserver
+    ... zeo-conf-additional = %%include %(sample_buildout)s/instancies-zeo1.conf
+    ... ''' % options)
+
+Setup the config files::
+
+    >>> write('zeo1',
+    ... '''mountpoint1''')
+
+    >>> write('myzeoserver.mydomain',
+    ... '''zeo1 zc1 11001 myzeoserver.mydomain''')
+
+Let's run it::
+
+    >>> print system(join('bin', 'buildout')),
+    Updating genwebconfig.
+    Updating zeo1.
+    Installing zc1.
+
+Once run, check for the startup scripts::
+
+    >>> zeomountpointsconfigfile = open(os.path.join('instancies-zeo1.conf')).read()
+    >>> zeomountpointsconfigfile = zeomountpointsconfigfile.replace('\\', '/')
+    >>> print zeomountpointsconfigfile
+    <blobstorage mountpoint1>
+      blob-dir .../var/blobstorage/mountpoint1
+      <filestorage mountpoint1>
+        path .../var/filestorage/Data_mountpoint1.fs
+      </filestorage>
+    </blobstorage>
+    <BLANKLINE>
+
+and the zope one::
+
+    >>> zopemountpointsconfigfile = open(os.path.join('zc1-mountpoints.conf')).read()
+    >>> zopemountpointsconfigfile = zopemountpointsconfigfile.replace('\\', '/')
+    >>> print zopemountpointsconfigfile
+    <zodb_db mountpoint1>
+      cache-size 5000
+      <zeoclient>
+         blob-dir .../var/blobstorage/mountpoint1
+         shared-blob-dir off
+         server myzeoserver.mydomain:8001
+         min-disconnect-poll 1
+         storage mountpoint1
+         name mountpoint1
+         cache-size 20MB
+      </zeoclient>
+      mount-point /mountpoint1
+    </zodb_db>
+    <BLANKLINE>

@@ -58,12 +58,20 @@ class Recipe(object):
                 part = self.buildout[part_name]
                 if part.get('recipe') in zeo_recipes:
                     activezeo = True
+                    self.blob_storage = part.get('blob-storage')
+                    self.file_storage = part.get('file-storage')
                     if part_name not in zeonames:
                         raise AssertionError('No zeoname specified for buildout part name: %s' % (part_name))
                     if not part.get('zeo-conf-additional'):
                         raise AssertionError('No additional mountpoint config for part name: %s' % (part_name))
             if not activezeo:
                 raise AssertionError('No active zeo recipe part name.')
+            if not self.blob_storage:
+                # Asuming default dir for storing blobs
+                self.blob_storage = 'blobstorage'
+            if not self.file_storage:
+                # Asuming default dir for storing database
+                self.file_storage = 'filestorage'
 
             for zeoname in zeonames:
 
@@ -75,19 +83,19 @@ class Recipe(object):
                         raise AssertionError('Error accessing URL: %s' % ('http://' + configserver + '/instancies/' + zeoname))
                 else:
                     try:
-                        instancies = open(configdir + '/' + zeoname, "r")
+                        instancies = open(os.path.join(configdir, zeoname), "r")
                     except:
                         raise AssertionError('No zeoname config file found in %s for %s' % (configdir, zeoname))
 
-                configZeoFile = open(configdir + '/' + 'instancies-' + zeoname + ".conf", "w")
+                configZeoFile = open(os.path.join(configdir, 'instancies-%s.conf' % zeoname), "w")
 
                 for instance in instancies.readlines():
                     instance = instance.replace('\n', '')
                     # Now we write the ZEO config
                     configZeoFile.write("<blobstorage " + instance + ">\n")
-                    configZeoFile.write("  blob-dir /var/plone/genwebupcZEO/produccio/var/blobs/" + instance + "\n")
+                    configZeoFile.write("  blob-dir %s/%s\n" % (os.path.join(directory, 'var', self.blob_storage), instance))
                     configZeoFile.write("  <filestorage " + instance + ">\n")
-                    configZeoFile.write("    path " + directory + "/var/filestorage/Data_" + instance + ".fs\n")
+                    configZeoFile.write("    path " "%s/Data_%s.fs\n" % (os.path.join(directory, 'var', self.file_storage), instance))
                     configZeoFile.write("  </filestorage>\n")
                     configZeoFile.write("</blobstorage>\n")
 
@@ -107,10 +115,18 @@ class Recipe(object):
                 part = self.buildout[part_name]
                 if part.get('recipe') in zope_recipes:
                     activezeo = True
+                    self.blob_storage = part.get('blob-storage')
+                    self.file_storage = part.get('file-storage')
                     if not part.get('zope-conf-additional'):
                         raise AssertionError('No additional mountpoint config for part name: %s' % (part_name))
             if not activezeo:
                 raise AssertionError('No active zeo recipe part name.')
+            if not self.blob_storage:
+                # Asuming default dir for storing blobs
+                self.blob_storage = 'blobstorage'
+            if not self.file_storage:
+                # Asuming default dir for storing database
+                self.file_storage = 'filestorage'
 
             localhost = options.get('localhost', 'localhost')
 
@@ -127,9 +143,9 @@ class Recipe(object):
                     raise AssertionError('Error accessing URL: %s' % ('http://' + configserver + '/config/ ' + localhost))
             else:
                 try:
-                    configFE = open(configdir + '/' + localhost, "r")
+                    configFE = open(os.path.join(configdir, localhost), "r")
                 except:
-                    raise AssertionError('No zeoname config file found in %s for %s' % (configdir, localhost))
+                    raise AssertionError('No frontend config file found in %s for %s' % (configdir, localhost))
 
             # assignacions = {'zeo1':[], 'zeo2':[], 'zeo3':[], 'zeo4':[], 'zeo5':[], 'zeo6':[], 'zeo7':[], 'zeo8':[], 'zeo9':[], 'zeo10':[], 'zeo11':[], 'zeo12':[],}
             # servers = {'zeo1':"", 'zeo2':"", 'zeo3':"", 'zeo4':"", 'zeo5':"", 'zeo6':"", 'zeo7':"", 'zeo8':"", 'zeo9':"", 'zeo10':"", 'zeo11':"", 'zeo12':"",}
@@ -161,11 +177,11 @@ class Recipe(object):
                             raise AssertionError('Error accessing URL: %s' % ('http://' + configserver + '/instancies/' + zeoname))
                     else:
                         try:
-                            instancies = open(configdir + '/' + zeoname, "r")
+                            instancies = open(os.path.join(configdir, zeoname), "r")
                         except:
                             raise AssertionError('No zeoname config file found in %s for %s' % (configdir, zeoname))
 
-                    zopeConfigFile = open(configdir + '/' + zope + '-mountpoints.conf', "w")
+                    zopeConfigFile = open(os.path.join(configdir, '%s-mountpoints.conf' % zope), "w")
                     self.writeZopeConfig(directory, zopeConfigFile, instancies, zeoname, servers[zeoname], zeoportsmap)
                     zopeConfigFile.close()
                     instancies.close()
@@ -178,7 +194,7 @@ class Recipe(object):
             zopeConfigFile.write("<zodb_db " + instance + ">\n")
             zopeConfigFile.write("  cache-size 5000\n")
             zopeConfigFile.write("  <zeoclient>\n")
-            zopeConfigFile.write("     blob-dir " + directory + "/var/blobs/" + instance + "\n")
+            zopeConfigFile.write("     blob-dir %s/%s\n" % (os.path.join(directory, 'var', self.blob_storage), instance))
             zopeConfigFile.write("     shared-blob-dir off\n")
             zopeConfigFile.write("     server " + server + ":" + str(zeoportsmap[zeoname]) + "\n")
             zopeConfigFile.write("     min-disconnect-poll 1\n")

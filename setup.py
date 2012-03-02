@@ -23,7 +23,8 @@ long_description = (
 entry_point = 'plone.recipe.genwebupc:Recipe'
 entry_points = {"zc.buildout": ["default = %s" % entry_point]}
 
-tests_require = ['zope.testing', 'zope.exceptions', 'zc.buildout']
+tests_require = ['zope.testing', 'zope.exceptions', 'zc.buildout', 'Zope2',
+                 'ZopeUndo', 'plone.recipe.zeoserver', 'plone.recipe.zope2instance']
 
 setup(name='plone.recipe.genwebupc',
       version=version,
