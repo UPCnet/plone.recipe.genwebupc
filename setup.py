@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
-version = '1.0'
+version = '1.1'
 
 long_description = (
     read('README.rst')
@@ -39,9 +39,9 @@ setup(name='plone.recipe.genwebupc',
         'License :: OSI Approved :: Zope Public License',
         ],
       keywords='',
-      author='',
-      author_email='',
-      url='http://svn.plone.org/svn/collective/',
+      author='Victor Fernandez de Alba',
+      author_email='sneridagh@gmail.com',
+      url='https://github.com/upcnet/plone.recipe.genwebupc',
       license='ZPL',
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['plone', 'plone.recipe'],

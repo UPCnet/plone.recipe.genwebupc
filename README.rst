@@ -5,7 +5,7 @@ Introduction
 
 This recipe is used in production of large Zope/Plone deployments where there are involved several ZEO/Zope servers in spanned across several machines with a complex configuration involved. This complex configuration often involves the one Plone instance-one ZODB mountpoint in large deployments.
 
-With this kind of scenario, you each buildout in each machine needs to be configured with the parameters of the system architecture.
+With this kind of scenario, you each buildout in each machine needs to be configured with the parameters of the system architecture. The recipe is configured with the recipe parameters AND two external files. This is done on purpose, because this two files contain the common parametrization
 
 
 Features
@@ -27,6 +27,7 @@ Let's assume the most basic scenario, a single server with both a ZEO server and
 
     [buildout]
     parts = genwebconfig zeo1 zc1
+    ...
 
     [genwebconfig]
     recipe = plone.recipe.genwebupc
@@ -44,7 +45,9 @@ Let's assume the most basic scenario, a single server with both a ZEO server and
     [zc1]
     recipe = plone.recipe.zope2instance
     zope-conf-additional = %include ${buildout:directory}/config/zc1-mountpoints.conf
+    ...
 
+This buildout will build the configuration for
 
 Options
 =======

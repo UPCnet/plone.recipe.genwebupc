@@ -95,7 +95,7 @@ class Recipe(object):
                     configZeoFile.write("<blobstorage " + instance + ">\n")
                     configZeoFile.write("  blob-dir %s/%s\n" % (os.path.join(directory, 'var', self.blob_storage), instance))
                     configZeoFile.write("  <filestorage " + instance + ">\n")
-                    configZeoFile.write("    path " "%s/Data_%s.fs\n" % (os.path.join(directory, 'var', self.file_storage), instance))
+                    configZeoFile.write("    path " "%s/Data_%s.fs\n" % (os.path.join(directory, 'var'), instance))
                     configZeoFile.write("  </filestorage>\n")
                     configZeoFile.write("</blobstorage>\n")
 
